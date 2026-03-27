@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes — Finanza</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F7F6F3;--surface:#FFFFFF;--surface2:#F0EEE9;
+  --border:#E4E1D9;--border2:#D0CCBF;
+  --text:#1A1916;--text2:#6B6760;--text3:#A09C94;
+  --ok:#27500A;--ok-bg:#EAF3DE;--ok-border:#B0D47A;
+  --info:#0C447C;--info-bg:#E6F1FB;--info-border:#85B7EB;
+  --bad:#791F1F;--bad-bg:#FCEBEB;--bad-border:#F09595;
+  --warn:#633806;--warn-bg:#FAEEDA;--warn-border:#F0B84A;
+  --teal:#085041;--teal-bg:#E1F5EE;--teal-border:#5DCAA5;
+  --amber:#633806;--amber-bg:#FAEEDA;--amber-border:#EF9F27;
+  --radius:8px;--radius-lg:12px;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:1700px;margin:0 auto;padding:16px 20px}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:12px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+.nav-l{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:var(--info-bg);border:2px solid var(--info-border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-titulo{font-size:15px;font-weight:700}
+.nav-sub{font-size:11px;color:var(--text2)}
+.nav-r{display:flex;align-items:center;gap:6px}
+button{font-family:var(--font);font-size:11px;font-weight:600;padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s}
+button:hover{background:var(--surface2)}
+button.primary{background:var(--info);color:white;border-color:var(--info)}
+button.primary:hover{background:#185FA5}
+button.success{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+button.danger{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-border)}
+button:disabled{opacity:.5;cursor:not-allowed}
+/* CFG */
+.cfg-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);align-items:center;box-shadow:var(--shadow)}
+.cfg-item{display:flex;align-items:center;gap:6px}
+.cfg-lbl{font-size:10px;color:var(--text2);font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+.cfg-item input{width:80px;text-align:right;font-family:var(--mono);font-size:11px;padding:4px 8px;border:1px solid var(--border2);border-radius:var(--radius);outline:none}
+.cfg-item input:focus{border-color:var(--info-border)}
+/* ALERTA */
+.alert{display:flex;gap:10px;padding:10px 14px;border-radius:var(--radius-lg);margin-bottom:12px;font-size:12px;border:1px solid}
+.alert-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+.alert-warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-border)}
+.alert-bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-border)}
+.alert-titulo{font-weight:700;margin-bottom:2px}
+.alert-sub{font-size:11px;opacity:.85}
+/* ZONA 1 */
+.z1-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.saldo-big{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;box-shadow:var(--shadow)}
+.saldo-big-lbl{font-size:10px;color:var(--text2);font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.saldo-big-val{font-size:26px;font-weight:700;font-family:var(--mono);line-height:1}
+.saldo-big-ctx{font-size:11px;margin-top:5px}
+.saldo-sm{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;box-shadow:var(--shadow)}
+.saldo-sm-lbl{font-size:10px;color:var(--text2);font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.saldo-sm-val{font-size:19px;font-weight:700;font-family:var(--mono);line-height:1}
+.saldo-sm-ctx{font-size:10px;margin-top:5px}
+.meta-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.meta-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.meta-lbl{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.meta-pct{font-size:15px;font-weight:700;font-family:var(--mono)}
+.meta-track{height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.meta-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.meta-vals{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+/* ZONA 2 */
+.z2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.acao{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;box-shadow:var(--shadow)}
+.acao-ttl{font-size:11px;font-weight:700;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px}
+.acao-item{display:flex;align-items:flex-start;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);gap:8px}
+.acao-item:last-child{border-bottom:none}
+.acao-txt{font-size:11px;color:var(--text);flex:1;min-width:0;font-weight:500}
+.acao-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.acao-val{font-size:12px;font-weight:700;font-family:var(--mono);flex-shrink:0}
+.acao-vazio{font-size:11px;color:var(--text3);padding:4px 0;font-style:italic}
+.acao-ok{font-size:11px;color:var(--ok);padding:4px 0;font-weight:600}
+/* FATURA CARD */
+.fatura-card{background:var(--info-bg);border:2px solid var(--info-border);border-radius:var(--radius-lg);padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:var(--shadow)}
+.fatura-l{display:flex;align-items:center;gap:10px}
+.fatura-icone{font-size:22px}
+.fatura-titulo{font-size:12px;font-weight:700;color:var(--info)}
+.fatura-sub{font-size:10px;color:#185FA5;margin-top:2px;opacity:.85}
+.fatura-r{display:flex;align-items:center;gap:16px}
+.fatura-bloco{text-align:center}
+.fatura-bloco-lbl{font-size:9px;color:#185FA5;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.fatura-bloco-val{font-size:14px;font-weight:700;font-family:var(--mono);color:var(--info)}
+.fatura-sep{width:1px;height:32px;background:var(--info-border)}
+.fatura-total-lbl{font-size:9px;color:#185FA5;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;text-align:right}
+.fatura-total-val{font-size:24px;font-weight:700;font-family:var(--mono);color:var(--info)}
+/* SECAO */
+.sec{font-size:10px;font-weight:700;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.05em}
+.sec-n{width:20px;height:20px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.sec-dica{font-size:10px;font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0}
+/* TABELAS */
+.tscroll{overflow-x:auto;margin-bottom:14px;padding-bottom:4px}
+.trow{display:flex;gap:12px;align-items:flex-start}
+.tb{flex-shrink:0}
+.tb-h{padding:6px 12px;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid;border-bottom:none}
+.tbblue{background:var(--info-bg);color:var(--info);border-color:var(--info-border)}
+.tbgreen{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+.tbteal{background:var(--teal-bg);color:var(--teal);border-color:var(--teal-border)}
+.tbamber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
+.tb-nome{font-size:12px;font-weight:700}
+.tb-inst{font-size:9px;opacity:.75;text-align:right}
+.tb-hint{font-size:10px;color:var(--text3);margin-top:4px;font-style:italic}
+table{border-collapse:collapse;background:var(--surface);border:1px solid var(--border);width:100%;box-shadow:var(--shadow)}
+th{background:var(--surface2);font-weight:700;font-size:10px;padding:6px 8px;border:1px solid var(--border);white-space:nowrap;color:var(--text2);text-align:center}
+th.l{text-align:left}
+td{padding:6px 8px;border:1px solid var(--border);font-size:11px;text-align:right;white-space:nowrap;color:var(--text)}
+td.l{text-align:left}
+td.c{text-align:center}
+.mn{font-family:var(--mono)}
+.zero{color:var(--text3)}
+.tr-tot td{background:var(--surface2);font-weight:700;border-top:2px solid var(--border2)}
+.tr-warn td{background:#FFFDF0}
+.tr-fatura td{background:var(--info-bg);border-top:2px solid var(--info-border)!important;border-bottom:2px solid var(--info-border)!important;font-weight:700}
+.slbl{font-size:10px;color:var(--text3);font-weight:700;padding:4px 8px;background:var(--surface2);text-align:left;border-bottom:1px solid var(--border)}
+/* TAGS */
+.tag{display:inline-block;font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700;border:1px solid;white-space:nowrap}
+.tok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+.tprev{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC}
+.tpend{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-border)}
+.twarn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-border)}
+/* ANALISE */
+.an-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.an-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;box-shadow:var(--shadow)}
+.an-ttl{font-size:10px;font-weight:700;color:var(--text2);margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em}
+.an-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);gap:8px}
+.an-row:last-child{border-bottom:none}
+.an-lbl{font-size:11px;color:var(--text2);flex:1}
+.an-val{font-size:12px;font-weight:700;font-family:var(--mono);flex-shrink:0}
+.an-tot{border-top:2px solid var(--border2);margin-top:3px;padding-top:5px}
+.bar-wrap{display:flex;align-items:center;gap:6px}
+.bar-track{width:50px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;flex-shrink:0;border:1px solid var(--border)}
+.bar-fill{height:100%;border-radius:3px;background:var(--info)}
+/* CORES */
+.cok{color:var(--ok)}.cwarn{color:var(--warn)}.cbad{color:var(--bad)}.cinfo{color:var(--info)}.cteal{color:var(--teal)}
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.modal-form{display:flex;flex-direction:column;gap:10px}
+.modal-row{display:flex;flex-direction:column;gap:4px}
+.modal-row label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+.modal-row input,.modal-row select{padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-family:var(--font);font-size:12px;outline:none;color:var(--text);background:var(--surface)}
+.modal-row input:focus,.modal-row select:focus{border-color:var(--info-border)}
+.modal-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.divisao-grid{display:grid;gap:8px;margin-top:4px}
+.divisao-item{display:flex;align-items:center;gap:8px}
+.divisao-cor{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.divisao-nome{font-size:12px;font-weight:600;flex:1}
+.divisao-input{width:90px;text-align:right}
+.val-check{font-size:11px;margin-top:6px;padding:4px 8px;border-radius:var(--radius)}
+.val-ok-bg{background:var(--ok-bg);color:var(--ok)}
+.val-err-bg{background:var(--bad-bg);color:var(--bad)}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:white;padding:10px 16px;border-radius:var(--radius-lg);font-size:12px;font-weight:500;z-index:200;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.col-gap{width:12px;flex-shrink:0}
+.col-stack{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.loading-full{text-align:center;padding:60px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav">
+    <div class="nav-l">
+      <div class="logo-icon">💰</div>
+      <div>
+        <div class="nav-titulo" id="navTitulo">Carregando...</div>
+        <div class="nav-sub" id="navSub"></div>
+      </div>
+    </div>
+    <div class="nav-r">
+      <button onclick="window.location.href='dashboard.html'">← Meses</button>
+      <button class="primary" onclick="abrirModal('cartao')">+ Cartao</button>
+      <button onclick="abrirModal('plantao')">+ Plantao</button>
+      <button onclick="abrirModal('boleto')">+ Boleto</button>
+      <button onclick="abrirModal('fluxo')">+ Fluxo</button>
+    </div>
+  </nav>
+
+  <div id="corpoApp" class="loading-full">Carregando dados do mes...</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="fecharModal(event)">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const sb = createClient('https://dnvkdgrmkmfjqihrbucx.supabase.co', 'sb_publishable_5ReBx16QNSOSlVAWpOrxBA_cRRi-o6t');
+
+const r2 = v => Math.round(v * 100) / 100;
+const fmt = v => 'R$ ' + Math.abs(r2(v)).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fS = v => (r2(v) < 0 ? '- ' : '') + fmt(v);
+
+let USER = null, MES = null, INTEG = [], CARTAO = [], FLUXO = [], PLANTOES = [], BOLETOS = [];
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; return; }
+  USER = session.user;
+  const params = new URLSearchParams(window.location.search);
+  const mesId = params.get('id');
+  if (!mesId) { window.location.href = 'dashboard.html'; return; }
+  await Promise.all([carregarMes(mesId), carregarInteg(), carregarDados(mesId)]);
+  render();
+}
+
+async function carregarMes(id) {
+  const { data } = await sb.from('meses').select('*').eq('id', id).single();
+  MES = data;
+  if (!MES) { window.location.href = 'dashboard.html'; return; }
+  const [ano, mes] = MES.mes_referencia.split('-');
+  const nome = new Date(ano, mes-1).toLocaleString('pt-BR', {month:'long', year:'numeric'});
+  document.getElementById('navTitulo').textContent = nome.charAt(0).toUpperCase() + nome.slice(1);
+  document.getElementById('navSub').textContent = 'Venc. cartao: dia ' + MES.vencimento_cartao + ' | Minimo: ' + fmt(MES.saldo_minimo) + ' | Meta: ' + fmt(MES.meta_economia);
+}
+
+async function carregarInteg() {
+  const { data } = await sb.from('integrantes').select('*').eq('usuario_id', USER.id).order('criado_em');
+  INTEG = data || [];
+}
+
+async function carregarDados(mesId) {
+  const [c, f, p, b] = await Promise.all([
+    sb.from('cartao_lancamentos').select('*, cartao_divisoes(*, integrantes(*))').eq('mes_id', mesId).order('criado_em'),
+    sb.from('fluxo').select('*, integrantes(nome)').eq('mes_id', mesId).order('criado_em'),
+    sb.from('plantoes').select('*').eq('mes_id', mesId).order('criado_em'),
+    sb.from('boletos').select('*').eq('mes_id', mesId).order('dia')
+  ]);
+  CARTAO = c.data || [];
+  FLUXO = f.data || [];
+  PLANTOES = p.data || [];
+  BOLETOS = b.data || [];
+}
+
+// ─── CALCULOS ────────────────────────────────────────────────────────────────
+function gVT() { return r2(CARTAO.reduce((a, r) => a + parseFloat(r.valor), 0)); }
+function gVB() { return r2(CARTAO.reduce((a, r) => a + parseFloat(r.valor_usuario), 0)); }
+function gVF() {
+  return r2(CARTAO.reduce((a, r) => {
+    const divTotal = (r.cartao_divisoes || []).reduce((x, d) => x + parseFloat(d.valor), 0);
+    return a + divTotal;
+  }, 0));
+}
+
+function gSA() {
+  const vt = gVT(); let fa = false, s = r2(parseFloat(MES.saldo_inicial));
+  FLUXO.filter(x => x.status === 'ok').forEach(x => {
+    let si = parseFloat(x.saida);
+    if (x.is_fatura) { if (!fa) { si = vt; fa = true; } else si = 0; }
+    s = r2(s + parseFloat(x.entrada) - si);
+  });
+  return s;
+}
+
+function gSP() {
+  const vt = gVT(); let fa = false, s = r2(parseFloat(MES.saldo_inicial));
+  FLUXO.forEach(x => {
+    let si = parseFloat(x.saida);
+    if (x.is_fatura) { if (!fa) { si = vt; fa = true; } else si = 0; }
+    s = r2(s + parseFloat(x.entrada) - si);
+  });
+  const pend = r2(BOLETOS.filter(b => b.status === 'pend').reduce((a, b) => a + parseFloat(b.valor), 0));
+  return r2(s - pend);
+}
+
+function gReim(integId) {
+  const deve = r2(CARTAO.reduce((a, r) => {
+    const div = (r.cartao_divisoes || []).find(d => d.integrante_id === integId);
+    return a + (div ? parseFloat(div.valor) : 0);
+  }, 0));
+  const pago = r2(FLUXO.filter(x => x.status === 'ok' && x.integrante_id === integId).reduce((a, x) => a + parseFloat(x.entrada), 0));
+  return { deve, pago, ab: r2(Math.max(0, deve - pago)) };
+}
+
+function sCl(v) {
+  const min = parseFloat(MES.saldo_minimo);
+  return v < 0 ? 'bad' : v < min ? 'warn' : 'ok';
+}
+
+function tagSt(st, dia, diaAtual) {
+  if (st === 'ok') return '<span class="tag tok">Pago</span>';
+  if (st === 'pend') return '<span class="tag tpend">Pendente</span>';
+  if (st === 'prev' && dia && diaAtual && dia < diaAtual) return '<span class="tag twarn">Atrasado</span>';
+  return '<span class="tag tprev">Previsto</span>';
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  const vt = gVT(), vb = gVB(), vf = gVF();
+  const sA = gSA(), sP = gSP();
+  const min = parseFloat(MES.saldo_minimo), meta = parseFloat(MES.meta_economia);
+  const vc = parseInt(MES.vencimento_cartao);
+  const vtOk = Math.abs(vt - vb - vf) < 0.01;
+  const pct = Math.min(100, Math.round((sP / meta) * 100));
+  const clA = sCl(sA), clP = sCl(sP);
+  const dia = new Date().getDate();
+
+  // Alerta
+  let aCls, aTit, aSub;
+  if (!vtOk && vt > 0) { aCls = 'alert-warn'; aTit = 'Erro de divisao no cartao'; aSub = 'A soma das partes nao bate com o total. Revise os lancamentos em amarelo.'; }
+  else if (sA < 0) { aCls = 'alert-bad'; aTit = 'Saldo negativo agora'; aSub = 'Voce gastou mais do que tinha disponivel.'; }
+  else if (sP < 0) { aCls = 'alert-bad'; aTit = 'Saldo pode ficar negativo'; aSub = 'Com os gastos previstos, o dinheiro pode acabar antes do fim do mes.'; }
+  else if (sP < min) { aCls = 'alert-warn'; aTit = 'Saldo previsto abaixo da reserva minima de ' + fmt(min); aSub = 'Nada critico agora, mas fique de olho.'; }
+  else if (sP >= meta) { aCls = 'alert-ok'; aTit = 'Voce vai bater a meta de ' + fmt(meta) + '!'; aSub = 'Saldo previsto: ' + fmt(sP) + ' — folga de ' + fmt(r2(sP - meta)) + '.'; }
+  else { aCls = 'alert-ok'; aTit = 'Tudo sob controle'; aSub = 'Saldo atual: ' + fmt(sA) + ' | Previsao fim do mes: ' + fmt(sP) + ' | Faltam ' + fmt(r2(meta - sP)) + ' para a meta.'; }
+
+  // Zona 2
+  const bPend = BOLETOS.filter(b => b.status === 'pend');
+  const bProx = BOLETOS.filter(b => b.status === 'prev' && b.dia && b.dia - dia >= 0 && b.dia - dia <= 5);
+  const reimbs = INTEG.map(i => ({ i, ...gReim(i.id) })).filter(r => r.ab > 0);
+  const plPrev = PLANTOES.filter(p => p.status === 'prev');
+
+  // Fluxo calculado
+  const vt2 = gVT(); let faF = false, fSaldo = r2(parseFloat(MES.saldo_inicial));
+  const fC = FLUXO.map(x => {
+    let si = parseFloat(x.saida);
+    if (x.is_fatura) { if (!faF) { si = vt2; faF = true; } else si = 0; }
+    fSaldo = r2(fSaldo + parseFloat(x.entrada) - si);
+    return { ...x, saiReal: r2(si), saldoAcc: fSaldo };
+  });
+
+  // Validacao cartao
+  const inv = CARTAO.map(r => {
+    const divTotal = r2((r.cartao_divisoes || []).reduce((a, d) => a + parseFloat(d.valor), 0));
+    return Math.abs(r2(parseFloat(r.valor_usuario) + divTotal) - r2(parseFloat(r.valor))) > 0.01;
+  });
+
+  // Analise
+  const cats = {};
+  CARTAO.forEach(r => { cats[r.categoria] = r2((cats[r.categoria] || 0) + parseFloat(r.valor)); });
+  const catS = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  const catT = r2(Object.values(cats).reduce((a, v) => a + v, 0));
+  const entT = r2(FLUXO.filter(x => x.status === 'ok' && parseFloat(x.entrada) > 0).reduce((a, x) => a + parseFloat(x.entrada), 0));
+  const saiT = r2(FLUXO.filter(x => x.status === 'ok').reduce((a, x) => { let s = parseFloat(x.saida); if (x.is_fatura) s = vt; return a + s; }, 0));
+
+  document.getElementById('corpoApp').innerHTML = `
+    <div class="alert ${aCls}">
+      <div><div class="alert-titulo">${aTit}</div><div class="alert-sub">${aSub}</div></div>
+    </div>
+
+    <div class="sec"><span class="sec-n">1</span>Situacao financeira agora</div>
+    <div class="z1-grid">
+      <div class="saldo-big" style="${clA !== 'ok' ? 'background:var(--' + clA + '-bg);border-color:var(--' + clA + '-border)' : ''}">
+        <div class="saldo-big-lbl">Disponivel na conta agora</div>
+        <div class="saldo-big-val c${clA}">${fmt(sA)}</div>
+        <div class="saldo-big-ctx c${clA}">${sA < 0 ? 'Voce esta no negativo' : sA < min ? 'Abaixo da reserva minima de ' + fmt(min) : 'Acima da reserva minima de ' + fmt(min)}</div>
+      </div>
+      <div class="saldo-sm">
+        <div class="saldo-sm-lbl">Previsao fim do mes</div>
+        <div class="saldo-sm-val c${clP}">${fS(sP)}</div>
+        <div class="saldo-sm-ctx c${clP}">${sP < 0 ? 'Pode zerar antes do fim' : sP < min ? 'Ficara abaixo do minimo' : 'Previsao confortavel'}</div>
+      </div>
+      <div class="saldo-sm">
+        <div class="saldo-sm-lbl">Fatura do cartao</div>
+        <div class="saldo-sm-val cinfo">${fmt(vt)}</div>
+        <div class="saldo-sm-ctx" style="color:var(--text3)">Sua parte: ${fmt(vb)} | Familia: ${fmt(vf)}</div>
+      </div>
+    </div>
+    <div class="meta-wrap">
+      <div class="meta-top"><span class="meta-lbl">Meta de economia — ${fmt(meta)}</span><span class="meta-pct c${pct >= 100 ? 'ok' : 'warn'}">${pct}% atingido</span></div>
+      <div class="meta-track"><div class="meta-fill" style="width:${pct}%;background:${pct >= 100 ? '#639922' : '#BA7517'}"></div></div>
+      <div class="meta-vals"><span>${fmt(0)}</span><span>${pct >= 100 ? 'Meta atingida!' : 'Faltam ' + fmt(r2(meta - sP))}</span><span>${fmt(meta)}</span></div>
+    </div>
+
+    ${vt > 0 ? `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)">
+      <div style="padding:10px 12px;border-right:1px solid var(--border)">
+        <div style="font-size:9px;font-weight:700;color:var(--info);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">1 — Voce compra</div>
+        <div style="font-size:11px;color:var(--text2)">Lance no Cartao e divida. Total forma a fatura.</div>
+        <div style="margin-top:5px;font-family:var(--mono);font-size:13px;color:var(--info);font-weight:700">${fmt(vt)}</div>
+      </div>
+      <div style="padding:10px 12px;border-right:1px solid var(--border);background:#F5F9FF">
+        <div style="font-size:9px;font-weight:700;color:var(--info);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">2 — Fatura debita (dia ${vc})</div>
+        <div style="font-size:11px;color:var(--text2)">No dia ${vc}, sai da conta automaticamente.</div>
+        <div style="margin-top:5px"><span class="tag ${dia >= vc ? 'tok' : 'tprev'}">${dia >= vc ? 'Ja debitou' : 'Debita dia ' + vc}</span></div>
+      </div>
+      <div style="padding:10px 12px;border-right:1px solid var(--border)">
+        <div style="font-size:9px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">3 — Familia te reembolsa</div>
+        <div style="font-size:11px;color:var(--text2)">Cada um te envia PIX. Lance no Fluxo.</div>
+        <div style="margin-top:5px;font-family:var(--mono);font-size:13px;color:var(--warn);font-weight:700">A receber: ${fmt(vf)}</div>
+      </div>
+      <div style="padding:10px 12px;background:#F5FFF5">
+        <div style="font-size:9px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">4 — Voce paga so sua parte</div>
+        <div style="font-size:11px;color:var(--text2)">Apos os reembolsos, voce paga so:</div>
+        <div style="margin-top:5px;font-family:var(--mono);font-size:13px;color:var(--ok);font-weight:700">${fmt(vb)}</div>
+      </div>
+    </div>` : ''}
+
+    <div class="sec"><span class="sec-n">2</span>O que precisa da sua atencao agora</div>
+    <div class="z2-grid">
+      <div class="acao">
+        <div class="acao-ttl" style="color:var(--bad)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--bad)"></span>Boletos urgentes</div>
+        ${[...bPend.map(b => `<div class="acao-item"><div><div class="acao-txt">${b.descricao}</div><div class="acao-sub">Venceu ${b.vencimento}</div></div><div><div class="acao-val cbad">${fmt(b.valor)}</div><button style="font-size:9px;padding:2px 7px;margin-top:2px" onclick="pagarBoleto('${b.id}')">Pagar</button></div></div>`),
+          ...bProx.map(b => `<div class="acao-item"><div><div class="acao-txt">${b.descricao}</div><div class="acao-sub">Vence ${b.vencimento}</div></div><div><div class="acao-val cwarn">${fmt(b.valor)}</div><button style="font-size:9px;padding:2px 7px;margin-top:2px" onclick="pagarBoleto('${b.id}')">Pagar</button></div></div>`)
+        ].join('') || '<div class="acao-vazio">Nenhum boleto urgente</div>'}
+      </div>
+      <div class="acao">
+        <div class="acao-ttl" style="color:var(--warn)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn)"></span>Familia deve pra voce</div>
+        ${reimbs.length === 0
+          ? '<div class="acao-ok">Todos ja pagaram voce</div>'
+          : reimbs.map(r => `<div class="acao-item"><div><div class="acao-txt">${r.i.nome}</div><div class="acao-sub">Deve: ${fmt(r.deve)} | Pago: ${fmt(r.pago)}</div></div><div class="acao-val cwarn">${fmt(r.ab)}</div></div>`).join('')}
+      </div>
+      <div class="acao">
+        <div class="acao-ttl" style="color:var(--teal)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal)"></span>Plantoes previstos</div>
+        ${plPrev.length === 0
+          ? '<div class="acao-vazio">Nenhum plantao previsto</div>'
+          : plPrev.map(p => `<div class="acao-item"><div><div class="acao-txt">${p.hospital}</div><div class="acao-sub">${p.data} — ${p.horas}</div></div><div><div class="acao-val cteal">${fmt(p.valor)}</div><button style="font-size:9px;padding:2px 7px;margin-top:2px;background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)" onclick="receberPlantao('${p.id}')">Recebido</button></div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="sec"><span class="sec-n">3</span>Lancamentos <span class="sec-dica">— preencha Cartao, Plantoes e Boletos. O resto e automatico.</span></div>
+    <div class="tscroll">
+      <div class="trow">
+        <div class="tb">
+          <div class="tb-h tbblue">
+            <span class="tb-nome">Cartao</span>
+            <span class="tb-inst">Lance cada compra e divida entre as pessoas</span>
+          </div>
+          <table>
+            <thead><tr>
+              <th class="l">Data</th><th class="l">Parcela</th><th class="l">Descricao</th><th class="l">Cat.</th>
+              <th>Total</th><th>Sua parte</th>
+              ${INTEG.map(i => `<th style="color:${i.cor}">${i.nome}</th>`).join('')}
+              <th>OK?</th><th>Acao</th>
+            </tr></thead>
+            <tbody>
+              ${CARTAO.length === 0 ? `<tr><td colspan="${8 + INTEG.length}" style="text-align:center;color:var(--text3);font-style:italic;padding:14px">Nenhum lancamento. Clique em "+ Cartao".</td></tr>` : ''}
+              ${CARTAO.map((r, i) => {
+                const divs = r.cartao_divisoes || [];
+                return `<tr class="${inv[i] ? 'tr-warn' : ''}">
+                  <td class="l">${r.data}</td><td class="l">${r.parcela}</td>
+                  <td class="l"><strong>${r.descricao}</strong></td>
+                  <td class="l"><span class="tag tprev">${r.categoria}</span></td>
+                  <td class="mn">${fmt(r.valor)}</td>
+                  <td class="mn cinfo">${fmt(r.valor_usuario)}</td>
+                  ${INTEG.map(ig => {
+                    const d = divs.find(x => x.integrante_id === ig.id);
+                    return `<td class="mn ${d && parseFloat(d.valor) > 0 ? '' : 'zero'}">${d && parseFloat(d.valor) > 0 ? fmt(d.valor) : '—'}</td>`;
+                  }).join('')}
+                  <td class="c">${inv[i] ? '<span class="tag tpend">Erro</span>' : '<span class="tag tok">OK</span>'}</td>
+                  <td class="c"><button style="font-size:9px;padding:2px 6px" class="danger" onclick="remover('cartao_lancamentos','${r.id}')">x</button></td>
+                </tr>`;
+              }).join('')}
+              ${CARTAO.length > 0 ? `<tr class="tr-tot">
+                <td class="l" colspan="4">Total</td>
+                <td class="mn">${fmt(vt)}</td>
+                <td class="mn cinfo">${fmt(vb)}</td>
+                ${INTEG.map(ig => `<td class="mn">${fmt(r2(CARTAO.reduce((a, r) => { const d = (r.cartao_divisoes||[]).find(x=>x.integrante_id===ig.id); return a+(d?parseFloat(d.valor):0); }, 0)))}</td>`).join('')}
+                <td class="c"><span class="tag ${vtOk?'tok':'tpend'}">${vtOk?'OK':'Erro'}</span></td>
+                <td></td>
+              </tr>` : ''}
+            </tbody>
+          </table>
+          <div class="tb-hint">Amarelo = soma das partes nao bate com o total</div>
+        </div>
+        <div class="col-gap"></div>
+        <div class="tb">
+          <div class="tb-h tbgreen">
+            <span class="tb-nome">Entradas e Saidas</span>
+            <span class="tb-inst">PIX e debitos manuais. Fatura e plantoes automaticos.</span>
+          </div>
+          <table>
+            <thead><tr><th class="l">Data</th><th class="l">Tipo</th><th class="l">Cat.</th><th class="l">Descricao</th><th>Entrou</th><th>Saiu</th><th>Status</th><th>Saldo</th><th>Acao</th></tr></thead>
+            <tbody>
+              <tr><td colspan="9" class="slbl">Saldo no inicio: ${fmt(parseFloat(MES.saldo_inicial))}</td></tr>
+              ${FLUXO.length === 0 ? `<tr><td colspan="9" style="text-align:center;color:var(--text3);font-style:italic;padding:12px">Nenhum lancamento.</td></tr>` : ''}
+              ${fC.map(x => `<tr class="${x.is_fatura ? 'tr-fatura' : ''}">
+                <td class="l">${x.data}</td>
+                <td class="l"><span class="tag ${x.tipo.includes('recebido')?'tok':x.tipo.includes('enviado')?'tpend':'twarn'}" style="font-size:9px">${x.tipo}</span></td>
+                <td class="l">${x.categoria}</td>
+                <td class="l">${x.is_fatura ? `<strong style="color:var(--info)">💳 Fatura (auto) — sua: ${fmt(vb)} | fam: ${fmt(vf)}</strong>` : x.descricao}${x.integrantes ? ` <span class="tag tprev" style="font-size:9px">${x.integrantes.nome}</span>` : ''}</td>
+                <td class="mn ${parseFloat(x.entrada)===0?'zero':'cok'}">${parseFloat(x.entrada)>0?fmt(x.entrada):'—'}</td>
+                <td class="mn ${x.saiReal===0?'zero':'cbad'}">${x.saiReal>0?fmt(x.saiReal):'—'}</td>
+                <td class="c"><span class="tag ${x.status==='ok'?'tok':x.status==='prev'?'tprev':'tpend'}" style="font-size:9px">${x.status==='ok'?'Confirmado':x.status==='prev'?'Previsto':'Pendente'}</span></td>
+                <td class="mn c${sCl(x.saldoAcc)}" style="font-weight:700">${fS(x.saldoAcc)}</td>
+                <td class="c">${!x.is_fatura?`<button style="font-size:9px;padding:2px 6px" class="danger" onclick="remover('fluxo','${x.id}')">x</button>`:'<span style="font-size:9px;color:var(--text3)">auto</span>'}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+          <div class="tb-hint">Linha azul = fatura automatica | Saldo verde=ok | Amarelo=abaixo do minimo | Vermelho=negativo</div>
+        </div>
+        <div class="col-gap"></div>
+        <div class="col-stack">
+          <div class="tb">
+            <div class="tb-h tbteal">
+              <span class="tb-nome">Plantoes</span>
+              <span class="tb-inst">Clique "Recebido" ao receber</span>
+            </div>
+            <table>
+              <thead><tr><th class="l">Data</th><th class="l">Hospital</th><th>H</th><th>Valor</th><th>Status</th><th>Acao</th></tr></thead>
+              <tbody>
+                ${PLANTOES.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--text3);font-style:italic;padding:10px">Nenhum plantao.</td></tr>` : ''}
+                ${PLANTOES.map(p => `<tr>
+                  <td class="l">${p.data}</td><td class="l">${p.hospital}</td>
+                  <td class="c">${p.horas}</td><td class="mn">${fmt(p.valor)}</td>
+                  <td class="c">${tagSt(p.status,null,null)}</td>
+                  <td class="c" style="display:flex;gap:4px">
+                    ${p.status==='prev'?`<button style="font-size:9px;padding:2px 6px" class="success" onclick="receberPlantao('${p.id}')">Recebido</button>`:''}
+                    <button style="font-size:9px;padding:2px 6px" class="danger" onclick="remover('plantoes','${p.id}')">x</button>
+                  </td>
+                </tr>`).join('')}
+                ${PLANTOES.length>0?`<tr class="tr-tot"><td class="l" colspan="3">Total recebido</td><td class="mn cok">${fmt(PLANTOES.filter(p=>p.status==='ok').reduce((a,p)=>a+parseFloat(p.valor),0))}</td><td colspan="2"></td></tr>`:''}
+              </tbody>
+            </table>
+          </div>
+          <div class="tb">
+            <div class="tb-h tbamber">
+              <span class="tb-nome">Boletos</span>
+              <span class="tb-inst">Clique "Pagar" ao pagar</span>
+            </div>
+            <table>
+              <thead><tr><th class="l">Vencimento</th><th class="l">Descricao</th><th>Valor</th><th>Status</th><th>Acao</th></tr></thead>
+              <tbody>
+                ${BOLETOS.length===0?`<tr><td colspan="5" style="text-align:center;color:var(--text3);font-style:italic;padding:10px">Nenhum boleto.</td></tr>`:''}
+                ${BOLETOS.map(b=>`<tr>
+                  <td class="l">${b.vencimento}</td><td class="l">${b.descricao}</td>
+                  <td class="mn">${fmt(b.valor)}</td>
+                  <td class="c">${tagSt(b.status,b.dia,new Date().getDate())}</td>
+                  <td class="c" style="display:flex;gap:4px">
+                    ${b.status!=='ok'?`<button style="font-size:9px;padding:2px 6px" class="success" onclick="pagarBoleto('${b.id}')">Pagar</button>`:''}
+                    <button style="font-size:9px;padding:2px 6px" class="danger" onclick="remover('boletos','${b.id}')">x</button>
+                  </td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+            <div class="tb-hint">Atrasado = venceu sem pagamento registrado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec" style="margin-top:4px"><span class="sec-n">4</span>Analise automatica <span class="sec-dica">— nenhum preenchimento necessario</span></div>
+    <div class="an-grid">
+      <div class="an-card">
+        <div class="an-ttl">Gastos por categoria</div>
+        ${catS.length===0?'<div style="font-size:11px;color:var(--text3);font-style:italic">Lance compras no cartao para ver aqui.</div>':catS.map(([cat,v])=>{const p=Math.round((v/catT)*100);return`<div class="an-row"><span class="an-lbl">${cat}</span><div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div><span class="an-val">${fmt(v)}</span></div></div>`;}).join('')}
+        ${catS.length>0?`<div class="an-row an-tot"><span class="an-lbl" style="font-weight:700">Total</span><span class="an-val">${fmt(catT)}</span></div>`:''}
+      </div>
+      <div class="an-card">
+        <div class="an-ttl">Reembolsos da familia</div>
+        ${INTEG.length===0?'<div style="font-size:11px;color:var(--text3);font-style:italic">Cadastre integrantes em Configuracoes.</div>':INTEG.map(i=>{const r=gReim(i.id);return`<div class="an-row"><span class="an-lbl">${i.nome}</span>${r.deve===0?'<span style="font-size:11px;color:var(--text3)">Nao deve nada</span>':r.ab===0?`<span class="tag tok">Pago ${fmt(r.deve)}</span>`:`<span class="tag tpend">Deve ${fmt(r.ab)}</span>`}</div>`;}).join('')}
+        <div class="an-row an-tot"><span class="an-lbl" style="font-weight:700">Total a receber</span><span class="an-val cwarn">${fmt(INTEG.reduce((a,i)=>a+gReim(i.id).ab,0))}</span></div>
+      </div>
+      <div class="an-card">
+        <div class="an-ttl">Conta corrente</div>
+        <div class="an-row"><span class="an-lbl">Total entrou</span><span class="an-val cok">${fmt(entT)}</span></div>
+        <div class="an-row"><span class="an-lbl">Total saiu</span><span class="an-val cbad">${fmt(saiT)}</span></div>
+        <div class="an-row"><span class="an-lbl">Plantoes recebidos</span><span class="an-val cok">${fmt(PLANTOES.filter(p=>p.status==='ok').reduce((a,p)=>a+parseFloat(p.valor),0))}</span></div>
+        <div class="an-row"><span class="an-lbl">Saldo agora</span><span class="an-val c${clA}">${fmt(sA)}</span></div>
+        <div class="an-row an-tot"><span class="an-lbl" style="font-weight:700">Previsao fim do mes</span><span class="an-val c${clP}" style="font-weight:700">${fS(sP)}</span></div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── MODALS ───────────────────────────────────────────────────────────────────
+window.abrirModal = (tipo) => {
+  const mb = document.getElementById('modalBg');
+  const mbox = document.getElementById('modalBox');
+  let html = '';
+  if (tipo === 'cartao') {
+    html = `<h3>+ Lancamento no Cartao</h3><div class="modal-form">
+      <div class="modal-grid2">
+        <div class="modal-row"><label>Data</label><input type="text" id="mDt" placeholder="01/03" value="${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}"></div>
+        <div class="modal-row"><label>Parcela</label><input type="text" id="mParc" placeholder="1/1 ou -" value="-"></div>
+      </div>
+      <div class="modal-row"><label>Descricao</label><input type="text" id="mDs" placeholder="Ex: Supermercado Extra" autofocus></div>
+      <div class="modal-row"><label>Categoria</label><select id="mCat"><option>Alimentacao</option><option>Moradia</option><option>Saude</option><option>Educacao</option><option>Lazer</option><option>Vestuario</option><option>Transporte</option><option>Outros</option></select></div>
+      <div class="modal-row"><label>Valor Total (R$)</label><input type="number" id="mV" placeholder="0.00" step="0.01" oninput="calcBrunna()"></div>
+      <div class="modal-row"><label>Sua parte (R$)</label><input type="number" id="mB" placeholder="0.00" step="0.01" oninput="validarDiv()"></div>
+      ${INTEG.length > 0 ? `<p style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.03em">Divisao por integrante:</p>
+      <div class="divisao-grid" style="grid-template-columns:${INTEG.length > 2 ? '1fr 1fr' : '1fr'}">
+        ${INTEG.map(i => `<div class="divisao-item">
+          <div class="divisao-cor" style="background:${i.cor}"></div>
+          <span class="divisao-nome">${i.nome}</span>
+          <input type="number" class="divisao-input modal-row input" placeholder="0.00" step="0.01" id="div_${i.id}" oninput="calcBrunna()">
+        </div>`).join('')}
+      </div>` : '<div style="font-size:11px;color:var(--text3);font-style:italic">Sem integrantes cadastrados. Vá em Configuracoes para adicionar.</div>'}
+      <div id="mValCheck" class="val-check" style="display:none"></div>
+      <div class="modal-actions"><button onclick="fecharModal()">Cancelar</button><button class="primary" onclick="salvarCartao()">Salvar</button></div>
+    </div>`;
+  } else if (tipo === 'plantao') {
+    html = `<h3>+ Novo Plantao</h3><div class="modal-form">
+      <div class="modal-grid2">
+        <div class="modal-row"><label>Data</label><input type="text" id="mDt" placeholder="01/03" autofocus></div>
+        <div class="modal-row"><label>Horas</label><input type="text" id="mHr" placeholder="12h"></div>
+      </div>
+      <div class="modal-row"><label>Hospital / Local</label><input type="text" id="mH" placeholder="Ex: UPA Central"></div>
+      <div class="modal-row"><label>Valor (R$)</label><input type="number" id="mV" placeholder="0.00" step="0.01"></div>
+      <div class="modal-row"><label>Status</label><select id="mSt"><option value="prev">Previsto</option><option value="ok">Ja Recebido</option></select></div>
+      <div class="modal-actions"><button onclick="fecharModal()">Cancelar</button><button class="primary" onclick="salvarPlantao()">Salvar</button></div>
+    </div>`;
+  } else if (tipo === 'boleto') {
+    html = `<h3>+ Novo Boleto</h3><div class="modal-form">
+      <div class="modal-grid2">
+        <div class="modal-row"><label>Vencimento</label><input type="text" id="mVc" placeholder="10/03" autofocus></div>
+        <div class="modal-row"><label>Dia do mes</label><input type="number" id="mD" placeholder="10" min="1" max="31"></div>
+      </div>
+      <div class="modal-row"><label>Descricao</label><input type="text" id="mDs" placeholder="Ex: Condominio"></div>
+      <div class="modal-row"><label>Valor (R$)</label><input type="number" id="mV" placeholder="0.00" step="0.01"></div>
+      <div class="modal-row"><label>Status</label><select id="mSt"><option value="prev">Previsto</option><option value="pend">Pendente</option><option value="ok">Pago</option></select></div>
+      <div class="modal-actions"><button onclick="fecharModal()">Cancelar</button><button class="primary" onclick="salvarBoleto()">Salvar</button></div>
+    </div>`;
+  } else if (tipo === 'fluxo') {
+    html = `<h3>+ Lancamento no Fluxo</h3><div class="modal-form">
+      <div class="modal-grid2">
+        <div class="modal-row"><label>Data</label><input type="text" id="mDt" placeholder="01/03" autofocus></div>
+        <div class="modal-row"><label>Tipo</label><select id="mTp"><option>PIX recebido</option><option>PIX enviado</option><option>Debito</option><option>Credito</option></select></div>
+      </div>
+      <div class="modal-row"><label>Categoria</label><select id="mCat"><option>Reembolso</option><option>Plantao</option><option>Moradia</option><option>Saude</option><option>Alimentacao</option><option>Educacao</option><option>Lazer</option><option>Outros</option></select></div>
+      <div class="modal-row"><label>Descricao</label><input type="text" id="mDs" placeholder="Ex: PIX Guilherme reembolso"></div>
+      ${INTEG.length > 0 ? `<div class="modal-row"><label>Integrante (se reembolso)</label><select id="mIg"><option value="">— nenhum —</option>${INTEG.map(i=>`<option value="${i.id}">${i.nome}</option>`).join('')}</select></div>` : ''}
+      <div class="modal-grid2">
+        <div class="modal-row"><label>Entrada (R$)</label><input type="number" id="mE" placeholder="0.00" step="0.01"></div>
+        <div class="modal-row"><label>Saida (R$)</label><input type="number" id="mS2" placeholder="0.00" step="0.01"></div>
+      </div>
+      <div class="modal-row"><label>Status</label><select id="mSt"><option value="ok">Confirmado</option><option value="prev">Previsto</option></select></div>
+      <div class="modal-actions"><button onclick="fecharModal()">Cancelar</button><button class="primary" onclick="salvarFluxo()">Salvar</button></div>
+    </div>`;
+  }
+  mbox.innerHTML = html;
+  mb.classList.add('open');
+};
+
+window.calcBrunna = () => {
+  const total = parseFloat(document.getElementById('mV')?.value) || 0;
+  const outros = INTEG.reduce((a, i) => a + (parseFloat(document.getElementById('div_' + i.id)?.value) || 0), 0);
+  const brunna = r2(total - outros);
+  if (document.getElementById('mB')) document.getElementById('mB').value = brunna >= 0 ? brunna.toFixed(2) : '0.00';
+  validarDiv();
+};
+
+window.validarDiv = () => {
+  const total = parseFloat(document.getElementById('mV')?.value) || 0;
+  const brunna = parseFloat(document.getElementById('mB')?.value) || 0;
+  const outros = INTEG.reduce((a, i) => a + (parseFloat(document.getElementById('div_' + i.id)?.value) || 0), 0);
+  const soma = r2(brunna + outros);
+  const el = document.getElementById('mValCheck');
+  if (!el) return;
+  if (total > 0 && Math.abs(soma - total) > 0.01) {
+    el.style.display = 'block'; el.className = 'val-check val-err-bg';
+    el.textContent = 'Soma das partes (' + fmt(soma) + ') difere do total (' + fmt(total) + ')';
+  } else if (total > 0) {
+    el.style.display = 'block'; el.className = 'val-check val-ok-bg';
+    el.textContent = 'Divisao correta — soma = ' + fmt(total);
+  } else el.style.display = 'none';
+};
+
+window.fecharModal = (e) => { if (!e || e.target === document.getElementById('modalBg')) document.getElementById('modalBg').classList.remove('open'); };
+
+window.salvarCartao = async () => {
+  const ds = document.getElementById('mDs').value.trim();
+  const v = parseFloat(document.getElementById('mV').value) || 0;
+  const vb2 = parseFloat(document.getElementById('mB').value) || 0;
+  if (!ds || v <= 0) { toast('Preencha descricao e valor.'); return; }
+  const { data: lanc, error } = await sb.from('cartao_lancamentos').insert({
+    mes_id: MES.id, usuario_id: USER.id, data: document.getElementById('mDt').value || '00/00',
+    parcela: document.getElementById('mParc').value || '-', descricao: ds,
+    categoria: document.getElementById('mCat').value, valor: v, valor_usuario: vb2
+  }).select().single();
+  if (error) { toast('Erro: ' + error.message); return; }
+  // Salvar divisoes
+  const divs = INTEG.map(i => ({ lancamento_id: lanc.id, integrante_id: i.id, usuario_id: USER.id, valor: parseFloat(document.getElementById('div_' + i.id)?.value) || 0 })).filter(d => d.valor > 0);
+  if (divs.length > 0) await sb.from('cartao_divisoes').insert(divs);
+  fecharModal(); toast('Lancamento salvo!'); await carregarDados(MES.id); render();
+};
+
+window.salvarPlantao = async () => {
+  const h = document.getElementById('mH').value.trim();
+  const v = parseFloat(document.getElementById('mV').value) || 0;
+  if (!h || v <= 0) { toast('Preencha hospital e valor.'); return; }
+  const st = document.getElementById('mSt').value;
+  const { error } = await sb.from('plantoes').insert({ mes_id: MES.id, usuario_id: USER.id, data: document.getElementById('mDt').value || '00/00', hospital: h, horas: document.getElementById('mHr').value || '-', valor: v, status: st });
+  if (error) { toast('Erro: ' + error.message); return; }
+  if (st === 'ok') await sb.from('fluxo').insert({ mes_id: MES.id, usuario_id: USER.id, data: document.getElementById('mDt').value || '00/00', tipo: 'PIX recebido', categoria: 'Plantao', descricao: 'Plantao ' + h, entrada: v, saida: 0, status: 'ok', is_fatura: false });
+  fecharModal(); toast('Plantao salvo!'); await carregarDados(MES.id); render();
+};
+
+window.salvarBoleto = async () => {
+  const ds = document.getElementById('mDs').value.trim();
+  const v = parseFloat(document.getElementById('mV').value) || 0;
+  if (!ds || v <= 0) { toast('Preencha descricao e valor.'); return; }
+  const st = document.getElementById('mSt').value;
+  const { error } = await sb.from('boletos').insert({ mes_id: MES.id, usuario_id: USER.id, vencimento: document.getElementById('mVc').value || '00/00', dia: parseInt(document.getElementById('mD').value) || 0, descricao: ds, valor: v, status: st });
+  if (error) { toast('Erro: ' + error.message); return; }
+  if (st === 'ok') await sb.from('fluxo').insert({ mes_id: MES.id, usuario_id: USER.id, data: document.getElementById('mVc').value || '00/00', tipo: 'Debito', categoria: 'Boleto', descricao: 'Boleto ' + ds, entrada: 0, saida: v, status: 'ok', is_fatura: false });
+  fecharModal(); toast('Boleto salvo!'); await carregarDados(MES.id); render();
+};
+
+window.salvarFluxo = async () => {
+  const ds = document.getElementById('mDs').value.trim();
+  const e = parseFloat(document.getElementById('mE').value) || 0;
+  const s = parseFloat(document.getElementById('mS2').value) || 0;
+  if (!ds || (e === 0 && s === 0)) { toast('Preencha descricao e valor.'); return; }
+  const igEl = document.getElementById('mIg');
+  const ig = igEl ? igEl.value || null : null;
+  const { error } = await sb.from('fluxo').insert({ mes_id: MES.id, usuario_id: USER.id, data: document.getElementById('mDt').value || '00/00', tipo: document.getElementById('mTp').value, categoria: document.getElementById('mCat').value, descricao: ds, integrante_id: ig || null, entrada: e, saida: s, status: document.getElementById('mSt').value, is_fatura: false });
+  if (error) { toast('Erro: ' + error.message); return; }
+  fecharModal(); toast('Lancamento salvo!'); await carregarDados(MES.id); render();
+};
+
+window.receberPlantao = async (id) => {
+  const p = PLANTOES.find(x => x.id === id);
+  if (!p) return;
+  await sb.from('plantoes').update({ status: 'ok' }).eq('id', id);
+  await sb.from('fluxo').insert({ mes_id: MES.id, usuario_id: USER.id, data: p.data, tipo: 'PIX recebido', categoria: 'Plantao', descricao: 'Plantao ' + p.hospital, entrada: p.valor, saida: 0, status: 'ok', is_fatura: false });
+  toast('Plantao marcado como recebido! Valor entrou no fluxo.'); await carregarDados(MES.id); render();
+};
+
+window.pagarBoleto = async (id) => {
+  const b = BOLETOS.find(x => x.id === id);
+  if (!b) return;
+  await sb.from('boletos').update({ status: 'ok' }).eq('id', id);
+  await sb.from('fluxo').insert({ mes_id: MES.id, usuario_id: USER.id, data: b.vencimento, tipo: 'Debito', categoria: 'Boleto', descricao: 'Boleto ' + b.descricao, entrada: 0, saida: b.valor, status: 'ok', is_fatura: false });
+  toast('Boleto pago! Valor saiu do fluxo automaticamente.'); await carregarDados(MES.id); render();
+};
+
+window.remover = async (tabela, id) => {
+  if (!confirm('Remover este item?')) return;
+  await sb.from(tabela).delete().eq('id', id);
+  toast('Removido.'); await carregarDados(MES.id); render();
+};
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+window.toast = toast;
+
+// Expor USER para uso global
+window.USER = null;
+init().then(() => { window.USER = USER; });
+</script>
+</body>
+</html>

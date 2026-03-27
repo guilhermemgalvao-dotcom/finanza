@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Finanza</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F6F3; --surface: #FFFFFF; --surface2: #F0EEE9;
+  --border: #E4E1D9; --border2: #D0CCBF;
+  --text: #1A1916; --text2: #6B6760; --text3: #A09C94;
+  --ok: #27500A; --ok-bg: #EAF3DE; --ok-border: #B0D47A;
+  --info: #0C447C; --info-bg: #E6F1FB; --info-border: #85B7EB;
+  --bad: #791F1F; --bad-bg: #FCEBEB; --bad-border: #F09595;
+  --warn: #633806; --warn-bg: #FAEEDA; --warn-border: #F0B84A;
+  --radius: 8px; --radius-lg: 12px;
+  --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+.app { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+.nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding: 14px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.nav-l { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 36px; height: 36px; background: var(--info-bg); border: 2px solid var(--info-border); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.logo-nome { font-size: 16px; font-weight: 700; }
+.nav-r { display: flex; align-items: center; gap: 8px; }
+.av { width: 34px; height: 34px; border-radius: 50%; background: var(--info-bg); border: 2px solid var(--info-border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--info); }
+.nav-nome { font-size: 13px; font-weight: 500; }
+button { font-family: var(--font); font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: var(--radius); border: 1px solid var(--border2); background: var(--surface); color: var(--text); cursor: pointer; transition: all .15s; }
+button:hover { background: var(--surface2); }
+button.primary { background: var(--info); color: white; border-color: var(--info); }
+button.primary:hover { background: #185FA5; }
+button.danger { background: var(--bad-bg); color: var(--bad); border-color: var(--bad-border); }
+h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.subtitulo { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.mes-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; cursor: pointer; transition: all .15s; box-shadow: var(--shadow); position: relative; }
+.mes-card:hover { border-color: var(--info-border); box-shadow: 0 4px 12px rgba(59,130,246,.1); transform: translateY(-1px); }
+.mes-card-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.mes-nome { font-size: 15px; font-weight: 700; }
+.mes-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; border: 1px solid; }
+.mes-badge-atual { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-border); }
+.mes-badge-passado { background: var(--surface2); color: var(--text3); border-color: var(--border); }
+.mes-metrica { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.mes-m { background: var(--surface2); border-radius: var(--radius); padding: 8px 10px; }
+.mes-m-lbl { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 3px; }
+.mes-m-val { font-size: 14px; font-weight: 700; font-family: var(--mono); }
+.mes-footer { display: flex; justify-content: space-between; align-items: center; }
+.mes-data { font-size: 11px; color: var(--text3); }
+.mes-del { font-size: 10px; padding: 3px 8px; }
+.novo-mes { background: var(--surface); border: 2px dashed var(--border2); border-radius: var(--radius-lg); padding: 18px 20px; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text2); font-size: 14px; font-weight: 600; min-height: 140px; }
+.novo-mes:hover { border-color: var(--info-border); color: var(--info); background: var(--info-bg); }
+.loading { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
+.vazio { text-align: center; padding: 40px; color: var(--text2); }
+.vazio h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.vazio p { font-size: 13px; color: var(--text3); }
+/* MODAL */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; width: 90%; max-width: 460px; box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+.modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.form-group { margin-bottom: 14px; }
+label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+input, select { width: 100%; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius); font-family: var(--font); font-size: 13px; color: var(--text); background: var(--surface); outline: none; }
+input:focus, select:focus { border-color: var(--info-border); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; padding: 10px 16px; border-radius: var(--radius-lg); font-size: 12px; font-weight: 500; z-index: 200; opacity: 0; transform: translateY(10px); transition: all .3s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.cok { color: var(--ok); } .cwarn { color: var(--warn); } .cbad { color: var(--bad); } .cinfo { color: var(--info); }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav">
+    <div class="nav-l">
+      <div class="logo-icon">💰</div>
+      <div class="logo-nome">Finanza</div>
+    </div>
+    <div class="nav-r">
+      <div class="av" id="navAv">?</div>
+      <span class="nav-nome" id="navNome">Carregando...</span>
+      <button onclick="irConfiguracoes()">Integrantes</button>
+      <button class="danger" onclick="sair()">Sair</button>
+    </div>
+  </nav>
+
+  <h1 id="tituloBoas">Ola!</h1>
+  <p class="subtitulo">Seus meses cadastrados. Clique em um para abrir ou crie um novo.</p>
+
+  <div id="listaMeses" class="loading">Carregando seus meses...</div>
+</div>
+
+<!-- MODAL NOVO MES -->
+<div class="modal-bg" id="modalBg" onclick="fecharModal(event)">
+  <div class="modal">
+    <h3>Novo mes</h3>
+    <div class="form-group">
+      <label>Mes de referencia</label>
+      <input type="month" id="novoMesRef" value="">
+    </div>
+    <div class="grid2">
+      <div class="form-group">
+        <label>Saldo inicial (R$)</label>
+        <input type="number" id="novoSI" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Vencimento cartao (dia)</label>
+        <input type="number" id="novoVC" value="10" min="1" max="31">
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="form-group">
+        <label>Saldo minimo (R$)</label>
+        <input type="number" id="novoMin" placeholder="500" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Meta de economia (R$)</label>
+        <input type="number" id="novoMeta" placeholder="1000" step="0.01">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button onclick="fecharModal()">Cancelar</button>
+      <button class="primary" onclick="criarMes()">Criar mes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const sb = createClient('https://dnvkdgrmkmfjqihrbucx.supabase.co', 'sb_publishable_5ReBx16QNSOSlVAWpOrxBA_cRRi-o6t');
+window.supabase = sb;
+
+const fmt = v => 'R$ ' + Math.abs(Math.round(v*100)/100).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fS = v => (v < 0 ? '- ' : '') + fmt(v);
+
+let USER = null;
+let MESES = [];
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; return; }
+  USER = session.user;
+
+  // Buscar perfil
+  const { data: perfil } = await sb.from('perfis').select('nome').eq('id', USER.id).single();
+  const nome = perfil?.nome || USER.email.split('@')[0];
+  document.getElementById('navAv').textContent = nome.charAt(0).toUpperCase();
+  document.getElementById('navNome').textContent = nome;
+  document.getElementById('tituloBoas').textContent = 'Ola, ' + nome + '!';
+
+  // Valor padrao do mes no modal
+  const agora = new Date();
+  document.getElementById('novoMesRef').value = agora.toISOString().slice(0,7);
+
+  await carregarMeses();
+}
+
+async function carregarMeses() {
+  const { data, error } = await sb.from('meses').select('*').eq('usuario_id', USER.id).order('mes_referencia', { ascending: false });
+  if (error) { document.getElementById('listaMeses').innerHTML = '<p style="color:red">Erro ao carregar meses.</p>'; return; }
+  MESES = data || [];
+  renderMeses();
+}
+
+function renderMeses() {
+  const el = document.getElementById('listaMeses');
+  const agora = new Date().toISOString().slice(0,7);
+  let html = '<div class="grid">';
+  html += `<div class="novo-mes" onclick="abrirModalNovoMes()"><span style="font-size:22px">+</span> Novo mes</div>`;
+  if (MESES.length === 0) {
+    el.innerHTML = '<div class="vazio"><h3>Nenhum mes ainda</h3><p>Crie seu primeiro mes para comecar a gestao financeira.</p></div>';
+    return;
+  }
+  MESES.forEach(m => {
+    const isAtual = m.mes_referencia === agora;
+    const [ano, mes] = m.mes_referencia.split('-');
+    const nomeMes = new Date(ano, mes-1).toLocaleString('pt-BR', {month:'long', year:'numeric'});
+    html += `
+      <div class="mes-card" onclick="abrirMes('${m.id}')">
+        <div class="mes-card-topo">
+          <div class="mes-nome">${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)}</div>
+          <span class="mes-badge ${isAtual ? 'mes-badge-atual' : 'mes-badge-passado'}">${isAtual ? 'Atual' : 'Passado'}</span>
+        </div>
+        <div class="mes-metrica">
+          <div class="mes-m">
+            <div class="mes-m-lbl">Saldo inicial</div>
+            <div class="mes-m-val cinfo">${fmt(m.saldo_inicial || 0)}</div>
+          </div>
+          <div class="mes-m">
+            <div class="mes-m-lbl">Meta</div>
+            <div class="mes-m-val">${fmt(m.meta_economia || 0)}</div>
+          </div>
+        </div>
+        <div class="mes-footer">
+          <span class="mes-data">Venc. cartao: dia ${m.vencimento_cartao}</span>
+          <button class="mes-del danger" onclick="event.stopPropagation(); deletarMes('${m.id}', '${nomeMes}')">Excluir</button>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+window.abrirModalNovoMes = () => { document.getElementById('modalBg').classList.add('open'); };
+window.fecharModal = (e) => { if (!e || e.target === document.getElementById('modalBg')) document.getElementById('modalBg').classList.remove('open'); };
+
+window.criarMes = async () => {
+  const ref = document.getElementById('novoMesRef').value;
+  const si = parseFloat(document.getElementById('novoSI').value) || 0;
+  const vc = parseInt(document.getElementById('novoVC').value) || 10;
+  const min = parseFloat(document.getElementById('novoMin').value) || 500;
+  const meta = parseFloat(document.getElementById('novoMeta').value) || 1000;
+  if (!ref) { toast('Selecione o mes de referencia.'); return; }
+  const { error } = await sb.from('meses').insert({ usuario_id: USER.id, mes_referencia: ref, saldo_inicial: si, vencimento_cartao: vc, saldo_minimo: min, meta_economia: meta });
+  if (error) { toast('Erro ao criar mes: ' + error.message); return; }
+  fecharModal(); toast('Mes criado com sucesso!'); await carregarMeses();
+};
+
+window.abrirMes = (id) => { window.location.href = `mes.html?id=${id}`; };
+
+window.deletarMes = async (id, nome) => {
+  if (!confirm(`Excluir "${nome}"? Todos os dados deste mes serao apagados.`)) return;
+  const { error } = await sb.from('meses').delete().eq('id', id);
+  if (error) { toast('Erro ao excluir.'); return; }
+  toast('Mes excluido.'); await carregarMeses();
+};
+
+window.irConfiguracoes = () => { window.location.href = 'config.html'; };
+
+window.sair = async () => {
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+};
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+window.toast = toast;
+
+init();
+</script>
+</body>
+</html>

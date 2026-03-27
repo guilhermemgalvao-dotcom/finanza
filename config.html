@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integrantes — Finanza</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F6F3; --surface: #FFFFFF; --surface2: #F0EEE9;
+  --border: #E4E1D9; --border2: #D0CCBF;
+  --text: #1A1916; --text2: #6B6760; --text3: #A09C94;
+  --ok: #27500A; --ok-bg: #EAF3DE; --ok-border: #B0D47A;
+  --info: #0C447C; --info-bg: #E6F1FB; --info-border: #85B7EB;
+  --bad: #791F1F; --bad-bg: #FCEBEB; --bad-border: #F09595;
+  --radius: 8px; --radius-lg: 12px;
+  --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+.app { max-width: 600px; margin: 0 auto; padding: 24px 20px; }
+.nav { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 14px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.logo-icon { width: 36px; height: 36px; background: var(--info-bg); border: 2px solid var(--info-border); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.logo-nome { font-size: 16px; font-weight: 700; flex: 1; }
+button { font-family: var(--font); font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: var(--radius); border: 1px solid var(--border2); background: var(--surface); color: var(--text); cursor: pointer; transition: all .15s; }
+button:hover { background: var(--surface2); }
+button.primary { background: var(--info); color: white; border-color: var(--info); }
+button.primary:hover { background: #185FA5; }
+button.danger { background: var(--bad-bg); color: var(--bad); border-color: var(--bad-border); }
+h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.subtitulo { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.form-add { display: flex; gap: 8px; margin-bottom: 20px; }
+.form-add input { flex: 1; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius); font-family: var(--font); font-size: 13px; outline: none; }
+.form-add input:focus { border-color: var(--info-border); }
+.cor-picker { width: 40px; height: 38px; border: 1px solid var(--border2); border-radius: var(--radius); cursor: pointer; padding: 2px; }
+.lista { display: flex; flex-direction: column; gap: 8px; }
+.integ-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); }
+.integ-cor { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(0,0,0,.1); }
+.integ-nome { flex: 1; font-size: 14px; font-weight: 600; }
+.integ-del { font-size: 11px; padding: 3px 8px; }
+.vazio { text-align: center; padding: 24px; color: var(--text3); font-size: 13px; font-style: italic; }
+.info-box { background: var(--info-bg); border: 1px solid var(--info-border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: var(--info); }
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; padding: 10px 16px; border-radius: var(--radius-lg); font-size: 12px; font-weight: 500; z-index: 200; opacity: 0; transform: translateY(10px); transition: all .3s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav">
+    <div class="logo-icon">💰</div>
+    <div class="logo-nome">Finanza — Integrantes</div>
+    <button onclick="window.location.href='dashboard.html'">← Voltar</button>
+  </nav>
+
+  <h1>Seus integrantes</h1>
+  <p class="subtitulo">Defina quem divide as despesas do cartao com voce. Voce pode ter quantos quiser.</p>
+
+  <div class="info-box">
+    Os integrantes que voce cadastrar aqui aparecerao como colunas no seu cartao de credito. Cada compra pode ser dividida entre voce e qualquer combinacao de integrantes.
+  </div>
+
+  <div class="card">
+    <div class="form-add">
+      <input type="color" id="novaCor" value="#378ADD" class="cor-picker">
+      <input type="text" id="nomeInteg" placeholder="Nome do integrante (ex: Guilherme)" maxlength="30">
+      <button class="primary" onclick="adicionarIntegrante()">Adicionar</button>
+    </div>
+    <div class="lista" id="listaInteg">
+      <div class="vazio">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const sb = createClient('https://dnvkdgrmkmfjqihrbucx.supabase.co', 'sb_publishable_5ReBx16QNSOSlVAWpOrxBA_cRRi-o6t');
+
+let USER = null;
+let INTEG = [];
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; return; }
+  USER = session.user;
+  await carregar();
+}
+
+async function carregar() {
+  const { data } = await sb.from('integrantes').select('*').eq('usuario_id', USER.id).order('criado_em');
+  INTEG = data || [];
+  render();
+}
+
+function render() {
+  const el = document.getElementById('listaInteg');
+  if (INTEG.length === 0) { el.innerHTML = '<div class="vazio">Nenhum integrante ainda. Adicione o primeiro acima.</div>'; return; }
+  el.innerHTML = INTEG.map(i => `
+    <div class="integ-item">
+      <div class="integ-cor" style="background:${i.cor || '#378ADD'}"></div>
+      <div class="integ-nome">${i.nome}</div>
+      <button class="integ-del danger" onclick="remover('${i.id}', '${i.nome}')">Remover</button>
+    </div>`).join('');
+}
+
+window.adicionarIntegrante = async () => {
+  const nome = document.getElementById('nomeInteg').value.trim();
+  const cor = document.getElementById('novaCor').value;
+  if (!nome) { toast('Digite um nome.'); return; }
+  if (INTEG.find(i => i.nome.toLowerCase() === nome.toLowerCase())) { toast('Ja existe um integrante com esse nome.'); return; }
+  const { error } = await sb.from('integrantes').insert({ usuario_id: USER.id, nome, cor });
+  if (error) { toast('Erro: ' + error.message); return; }
+  document.getElementById('nomeInteg').value = '';
+  toast(nome + ' adicionado!');
+  await carregar();
+};
+
+window.remover = async (id, nome) => {
+  if (!confirm(`Remover "${nome}"? Isso pode afetar lancamentos existentes.`)) return;
+  const { error } = await sb.from('integrantes').delete().eq('id', id);
+  if (error) { toast('Erro ao remover.'); return; }
+  toast(nome + ' removido.'); await carregar();
+};
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+init();
+</script>
+</body>
+</html>

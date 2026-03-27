@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finanza — Gestao Financeira Pessoal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F6F3; --surface: #FFFFFF; --surface2: #F0EEE9;
+  --border: #E4E1D9; --border2: #D0CCBF;
+  --text: #1A1916; --text2: #6B6760; --text3: #A09C94;
+  --ok: #27500A; --ok-bg: #EAF3DE; --ok-border: #B0D47A;
+  --info: #0C447C; --info-bg: #E6F1FB; --info-border: #85B7EB;
+  --bad: #791F1F; --bad-bg: #FCEBEB; --bad-border: #F09595;
+  --warn: #633806; --warn-bg: #FAEEDA; --warn-border: #F0B84A;
+  --radius: 8px; --radius-lg: 12px;
+  --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; width: 100%; max-width: 400px; box-shadow: var(--shadow); }
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.logo-icon { width: 40px; height: 40px; background: var(--info-bg); border: 2px solid var(--info-border); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.logo-nome { font-size: 22px; font-weight: 700; color: var(--text); }
+.logo-sub { font-size: 12px; color: var(--text3); }
+h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.subtitulo { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+.form-group { margin-bottom: 14px; }
+label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+input { width: 100%; padding: 10px 12px; border: 1px solid var(--border2); border-radius: var(--radius); font-family: var(--font); font-size: 13px; color: var(--text); background: var(--surface); outline: none; transition: border-color .15s; }
+input:focus { border-color: var(--info-border); box-shadow: 0 0 0 3px rgba(59,130,246,.08); }
+.btn { width: 100%; padding: 11px; border-radius: var(--radius); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; margin-top: 4px; }
+.btn-primary { background: var(--info); color: white; }
+.btn-primary:hover { background: #185FA5; }
+.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: var(--text3); font-size: 12px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.link { text-align: center; font-size: 12px; color: var(--text2); margin-top: 16px; }
+.link a { color: var(--info); text-decoration: none; font-weight: 600; }
+.link a:hover { text-decoration: underline; }
+.msg { padding: 10px 14px; border-radius: var(--radius); font-size: 12px; margin-bottom: 14px; display: none; }
+.msg-ok { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+.msg-err { background: var(--bad-bg); color: var(--bad); border: 1px solid var(--bad-border); }
+.tabs { display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 3px; margin-bottom: 20px; }
+.tab { flex: 1; padding: 7px; text-align: center; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: all .15s; color: var(--text2); border: none; background: transparent; font-family: var(--font); }
+.tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); border: 1px solid var(--border); }
+#painelCadastro { display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">💰</div>
+    <div>
+      <div class="logo-nome">Finanza</div>
+      <div class="logo-sub">Gestao financeira pessoal</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('login')">Entrar</button>
+    <button class="tab" onclick="setTab('cadastro')">Criar conta</button>
+  </div>
+
+  <div id="painelLogin">
+    <div class="msg msg-err" id="msgLoginErr"></div>
+    <div class="msg msg-ok" id="msgLoginOk"></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="seu@email.com">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="loginSenha" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
+    </div>
+    <button class="btn btn-primary" id="btnLogin" onclick="fazerLogin()">Entrar</button>
+    <div class="link"><a href="#" onclick="recuperarSenha()">Esqueci minha senha</a></div>
+  </div>
+
+  <div id="painelCadastro">
+    <div class="msg msg-err" id="msgCadErr"></div>
+    <div class="msg msg-ok" id="msgCadOk"></div>
+    <div class="form-group">
+      <label>Seu nome</label>
+      <input type="text" id="cadNome" placeholder="Como quer ser chamado?">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="cadEmail" placeholder="seu@email.com">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="cadSenha" placeholder="Minimo 6 caracteres" onkeydown="if(event.key==='Enter')fazerCadastro()">
+    </div>
+    <button class="btn btn-primary" id="btnCad" onclick="fazerCadastro()">Criar minha conta</button>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://dnvkdgrmkmfjqihrbucx.supabase.co', 'sb_publishable_5ReBx16QNSOSlVAWpOrxBA_cRRi-o6t');
+
+// Se ja logado, redireciona
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) window.location.href = 'dashboard.html';
+});
+
+window.setTab = function(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('painelLogin').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('painelCadastro').style.display = tab === 'cadastro' ? 'block' : 'none';
+};
+
+window.fazerLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const senha = document.getElementById('loginSenha').value;
+  const btn = document.getElementById('btnLogin');
+  const err = document.getElementById('msgLoginErr');
+  if (!email || !senha) { mostrarMsg(err, 'Preencha email e senha.'); return; }
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+  if (error) {
+    mostrarMsg(err, 'Email ou senha incorretos.');
+    btn.disabled = false; btn.textContent = 'Entrar';
+  } else {
+    window.location.href = 'dashboard.html';
+  }
+};
+
+window.fazerCadastro = async function() {
+  const nome = document.getElementById('cadNome').value.trim();
+  const email = document.getElementById('cadEmail').value.trim();
+  const senha = document.getElementById('cadSenha').value;
+  const btn = document.getElementById('btnCad');
+  const err = document.getElementById('msgCadErr');
+  const ok = document.getElementById('msgCadOk');
+  if (!nome || !email || !senha) { mostrarMsg(err, 'Preencha todos os campos.'); return; }
+  if (senha.length < 6) { mostrarMsg(err, 'A senha precisa ter pelo menos 6 caracteres.'); return; }
+  btn.disabled = true; btn.textContent = 'Criando conta...';
+  const { error } = await supabase.auth.signUp({ email, password: senha, options: { data: { nome } } });
+  if (error) {
+    mostrarMsg(err, error.message);
+    btn.disabled = false; btn.textContent = 'Criar minha conta';
+  } else {
+    mostrarMsg(ok, 'Conta criada! Verifique seu email para confirmar o cadastro.');
+    btn.disabled = false; btn.textContent = 'Criar minha conta';
+  }
+};
+
+window.recuperarSenha = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { mostrarMsg(document.getElementById('msgLoginErr'), 'Digite seu email primeiro.'); return; }
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
+  if (!error) mostrarMsg(document.getElementById('msgLoginOk'), 'Email de recuperacao enviado!');
+};
+
+function mostrarMsg(el, txt) {
+  el.textContent = txt; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+</script>
+</body>
+</html>
