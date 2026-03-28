@@ -574,22 +574,41 @@ window.abrirModal = (tipo) => {
     html = `<h3>+ Lancamento no Cartao</h3><div class="modal-form">
       <div class="modal-grid2">
         <div class="modal-row"><label>Data</label><input type="text" id="mDt" placeholder="01/03" value="${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}"></div>
-        <div class="modal-row"><label>Parcela</label><input type="text" id="mParc" placeholder="1/1 ou -" value="-"></div>
+        <div class="modal-row"><label>Categoria</label><select id="mCat"><option>Alimentacao</option><option>Moradia</option><option>Saude</option><option>Educacao</option><option>Lazer</option><option>Vestuario</option><option>Transporte</option><option>Outros</option></select></div>
       </div>
       <div class="modal-row"><label>Descricao</label><input type="text" id="mDs" placeholder="Ex: Supermercado Extra" autofocus></div>
-      <div class="modal-row"><label>Categoria</label><select id="mCat"><option>Alimentacao</option><option>Moradia</option><option>Saude</option><option>Educacao</option><option>Lazer</option><option>Vestuario</option><option>Transporte</option><option>Outros</option></select></div>
-      <div class="modal-row"><label>Valor Total (R$)</label><input type="number" id="mV" placeholder="0.00" step="0.01" oninput="calcBrunna()"></div>
-      <div class="modal-row"><label>Sua parte (R$)</label><input type="number" id="mB" placeholder="0.00" step="0.01" oninput="validarDiv()"></div>
-      ${INTEG.length > 0 ? `<p style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.03em">Divisao por integrante:</p>
+      <div class="modal-row"><label>Valor Total da Compra (R$)</label><input type="number" id="mV" placeholder="0.00" step="0.01" oninput="calcBrunna()"></div>
+
+      <div style="background:var(--surface2);border-radius:var(--radius);padding:10px 12px;display:flex;gap:12px;align-items:center">
+        <div style="flex:1">
+          <label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Parcelado em</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="mTotalParc" value="1" min="1" max="48" style="width:60px;text-align:center" oninput="atualizarParc()">
+            <span style="font-size:12px;color:var(--text2)">vezes</span>
+          </div>
+        </div>
+        <div style="flex:1">
+          <label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Valor por parcela</label>
+          <div id="mValParc" style="font-size:14px;font-weight:700;font-family:var(--mono);color:var(--info)">R$ 0,00</div>
+        </div>
+        <div style="flex:1">
+          <label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Recorrente todo mes</label>
+          <input type="checkbox" id="mRecorrente" style="width:18px;height:18px;cursor:pointer">
+        </div>
+      </div>
+
+      <div class="modal-row"><label>Sua parte desta parcela (R$)</label><input type="number" id="mB" placeholder="0.00" step="0.01" oninput="validarDiv()"></div>
+      ${INTEG.length > 0 ? `<p style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.03em">Divisao por integrante (desta parcela):</p>
       <div class="divisao-grid" style="grid-template-columns:${INTEG.length > 2 ? '1fr 1fr' : '1fr'}">
         ${INTEG.map(i => `<div class="divisao-item">
           <div class="divisao-cor" style="background:${i.cor}"></div>
           <span class="divisao-nome">${i.nome}</span>
-          <input type="number" class="divisao-input modal-row input" placeholder="0.00" step="0.01" id="div_${i.id}" oninput="calcBrunna()">
+          <input type="number" class="divisao-input" placeholder="0.00" step="0.01" id="div_${i.id}" oninput="calcBrunna()">
         </div>`).join('')}
-      </div>` : '<div style="font-size:11px;color:var(--text3);font-style:italic">Sem integrantes cadastrados. Vá em Configuracoes para adicionar.</div>'}
+      </div>` : '<div style="font-size:11px;color:var(--text3);font-style:italic">Sem integrantes. Va em Integrantes para adicionar.</div>'}
       <div id="mValCheck" class="val-check" style="display:none"></div>
-      <div class="modal-actions"><button onclick="fecharModal()">Cancelar</button><button class="primary" onclick="salvarCartao()">Salvar</button></div>
+      <div id="mPropInfo" style="font-size:11px;color:var(--info);background:var(--info-bg);padding:6px 10px;border-radius:var(--radius);display:none"></div>
+      <div class="modal-actions"><button onclick="fecharModal()">Cancelar</button><button class="primary" onclick="salvarCartao()">Salvar e propagar</button></div>
     </div>`;
   } else if (tipo === 'plantao') {
     html = `<h3>+ Novo Plantao</h3><div class="modal-form">
@@ -610,7 +629,18 @@ window.abrirModal = (tipo) => {
       </div>
       <div class="modal-row"><label>Descricao</label><input type="text" id="mDs" placeholder="Ex: Condominio"></div>
       <div class="modal-row"><label>Valor (R$)</label><input type="number" id="mV" placeholder="0.00" step="0.01"></div>
+      <div style="background:var(--surface2);border-radius:var(--radius);padding:10px 12px;display:flex;gap:12px;align-items:center">
+        <div style="flex:1">
+          <label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Recorrente</label>
+          <input type="checkbox" id="mRecorrente" style="width:18px;height:18px;cursor:pointer" onchange="toggleRecorrencia()">
+        </div>
+        <div style="flex:2" id="divMesesRecorrencia" style="display:none">
+          <label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Repetir por quantos meses</label>
+          <input type="number" id="mMesesRec" value="12" min="1" max="60" style="width:80px">
+        </div>
+      </div>
       <div class="modal-row"><label>Status</label><select id="mSt"><option value="prev">Previsto</option><option value="pend">Pendente</option><option value="ok">Pago</option></select></div>
+      <div id="mPropInfo" style="font-size:11px;color:var(--info);background:var(--info-bg);padding:6px 10px;border-radius:var(--radius);display:none">Este boleto sera criado automaticamente nos proximos meses.</div>
       <div class="modal-actions"><button onclick="fecharModal()">Cancelar</button><button class="primary" onclick="salvarBoleto()">Salvar</button></div>
     </div>`;
   } else if (tipo === 'fluxo') {
@@ -634,27 +664,58 @@ window.abrirModal = (tipo) => {
   mb.classList.add('open');
 };
 
+window.atualizarParc = () => {
+  const total = parseFloat(document.getElementById('mV')?.value) || 0;
+  const parc = parseInt(document.getElementById('mTotalParc')?.value) || 1;
+  const valParc = parc > 0 ? r2(total / parc) : 0;
+  const el = document.getElementById('mValParc');
+  if (el) el.textContent = fmt(valParc);
+  const info = document.getElementById('mPropInfo');
+  if (info && parc > 1) {
+    info.style.display = 'block';
+    info.textContent = `Esta compra sera lancada automaticamente nos proximos ${parc-1} meses (${parc}x de ${fmt(valParc)}).`;
+  } else if (info) info.style.display = 'none';
+  calcBrunna();
+};
+
+window.toggleRecorrencia = () => {
+  const rec = document.getElementById('mRecorrente')?.checked;
+  const div = document.getElementById('divMesesRecorrencia');
+  if (div) div.style.display = rec ? 'block' : 'none';
+  const info = document.getElementById('mPropInfo');
+  if (info) {
+    info.style.display = rec ? 'block' : 'none';
+    info.textContent = 'Este boleto sera criado automaticamente nos proximos meses.';
+  }
+};
+
 window.calcBrunna = () => {
   const total = parseFloat(document.getElementById('mV')?.value) || 0;
+  const parc = parseInt(document.getElementById('mTotalParc')?.value) || 1;
+  const valParc = r2(total / parc);
   const outros = INTEG.reduce((a, i) => a + (parseFloat(document.getElementById('div_' + i.id)?.value) || 0), 0);
-  const brunna = r2(total - outros);
+  const brunna = r2(valParc - outros);
   if (document.getElementById('mB')) document.getElementById('mB').value = brunna >= 0 ? brunna.toFixed(2) : '0.00';
+  const el = document.getElementById('mValParc');
+  if (el) el.textContent = fmt(valParc);
   validarDiv();
 };
 
 window.validarDiv = () => {
   const total = parseFloat(document.getElementById('mV')?.value) || 0;
+  const parc = parseInt(document.getElementById('mTotalParc')?.value) || 1;
+  const valParc = r2(total / parc);
   const brunna = parseFloat(document.getElementById('mB')?.value) || 0;
   const outros = INTEG.reduce((a, i) => a + (parseFloat(document.getElementById('div_' + i.id)?.value) || 0), 0);
   const soma = r2(brunna + outros);
   const el = document.getElementById('mValCheck');
   if (!el) return;
-  if (total > 0 && Math.abs(soma - total) > 0.01) {
+  if (valParc > 0 && Math.abs(soma - valParc) > 0.01) {
     el.style.display = 'block'; el.className = 'val-check val-err-bg';
-    el.textContent = 'Soma das partes (' + fmt(soma) + ') difere do total (' + fmt(total) + ')';
-  } else if (total > 0) {
+    el.textContent = 'Soma das partes (' + fmt(soma) + ') difere do valor da parcela (' + fmt(valParc) + ')';
+  } else if (valParc > 0) {
     el.style.display = 'block'; el.className = 'val-check val-ok-bg';
-    el.textContent = 'Divisao correta — soma = ' + fmt(total);
+    el.textContent = 'Divisao correta — soma = ' + fmt(valParc);
   } else el.style.display = 'none';
 };
 
@@ -662,19 +723,72 @@ window.fecharModal = (e) => { if (!e || e.target === document.getElementById('mo
 
 window.salvarCartao = async () => {
   const ds = document.getElementById('mDs').value.trim();
-  const v = parseFloat(document.getElementById('mV').value) || 0;
+  const vTotal = parseFloat(document.getElementById('mV').value) || 0;
+  const totalParc = parseInt(document.getElementById('mTotalParc')?.value) || 1;
+  const recorrente = document.getElementById('mRecorrente')?.checked || false;
+  const valParc = r2(vTotal / totalParc);
   const vb2 = parseFloat(document.getElementById('mB').value) || 0;
-  if (!ds || v <= 0) { toast('Preencha descricao e valor.'); return; }
+  if (!ds || vTotal <= 0) { toast('Preencha descricao e valor.'); return; }
+  const grupoParcela = crypto.randomUUID();
+
   const { data: lanc, error } = await sb.from('cartao_lancamentos').insert({
-    mes_id: MES.id, usuario_id: USER.id, data: document.getElementById('mDt').value || '00/00',
-    parcela: document.getElementById('mParc').value || '-', descricao: ds,
-    categoria: document.getElementById('mCat').value, valor: v, valor_usuario: vb2
+    mes_id: MES.id, usuario_id: USER.id,
+    data: document.getElementById('mDt').value || '01/00',
+    parcela: totalParc > 1 ? '1/' + totalParc : (recorrente ? 'Mensal' : '-'),
+    descricao: ds, categoria: document.getElementById('mCat').value,
+    valor: valParc, valor_usuario: vb2,
+    total_parcelas: totalParc, parcela_atual: 1,
+    grupo_parcela: totalParc > 1 || recorrente ? grupoParcela : null,
+    recorrente
   }).select().single();
   if (error) { toast('Erro: ' + error.message); return; }
-  // Salvar divisoes
-  const divs = INTEG.map(i => ({ lancamento_id: lanc.id, integrante_id: i.id, usuario_id: USER.id, valor: parseFloat(document.getElementById('div_' + i.id)?.value) || 0 })).filter(d => d.valor > 0);
+
+  const divs = INTEG.map(i => ({
+    lancamento_id: lanc.id, integrante_id: i.id, usuario_id: USER.id,
+    valor: parseFloat(document.getElementById('div_' + i.id)?.value) || 0
+  })).filter(d => d.valor > 0);
   if (divs.length > 0) await sb.from('cartao_divisoes').insert(divs);
-  fecharModal(); toast('Lancamento salvo!'); await carregarDados(MES.id); render();
+
+  // Propagar parcelas nos meses seguintes
+  if (totalParc > 1 || recorrente) {
+    const mesesPropagar = recorrente ? 11 : totalParc - 1;
+    const { data: mesSrc } = await sb.from('meses').select('mes_referencia').eq('id', MES.id).single();
+    for (let i = 1; i <= mesesPropagar; i++) {
+      const dtBase = new Date(mesSrc.mes_referencia + '-01');
+      dtBase.setMonth(dtBase.getMonth() + i);
+      const refProx = dtBase.toISOString().slice(0, 7);
+      const diaStr = document.getElementById('mDt').value.slice(0,2) || '01';
+
+      // Buscar ou criar o mes
+      let { data: mesProx } = await sb.from('meses').select('id').eq('usuario_id', USER.id).eq('mes_referencia', refProx).single();
+      if (!mesProx) {
+        const { data: novo } = await sb.from('meses').insert({ usuario_id: USER.id, mes_referencia: refProx, saldo_inicial: 0, vencimento_cartao: MES.vencimento_cartao, saldo_minimo: MES.saldo_minimo, meta_economia: MES.meta_economia, arquivado: false }).select('id').single();
+        mesProx = novo;
+      }
+
+      const numParc = recorrente ? (i+1) : (i+1);
+      const { data: lancProx } = await sb.from('cartao_lancamentos').insert({
+        mes_id: mesProx.id, usuario_id: USER.id,
+        data: diaStr + '/' + String(dtBase.getMonth()+1).padStart(2,'0') + '/' + dtBase.getFullYear(),
+        parcela: totalParc > 1 ? (i+1)+'/'+totalParc : 'Mensal',
+        descricao: ds, categoria: document.getElementById('mCat').value,
+        valor: valParc, valor_usuario: vb2,
+        total_parcelas: totalParc, parcela_atual: i+1,
+        grupo_parcela: grupoParcela, recorrente
+      }).select('id').single();
+
+      if (lancProx && divs.length > 0) {
+        await sb.from('cartao_divisoes').insert(
+          divs.map(d => ({ ...d, lancamento_id: lancProx.id }))
+        );
+      }
+    }
+    toast(`Lancamento salvo e propagado por ${mesesPropagar} mes(es)!`);
+  } else {
+    toast('Lancamento salvo!');
+  }
+
+  fecharModal(); await carregarDados(MES.id); render();
 };
 
 window.salvarPlantao = async () => {
@@ -693,10 +807,52 @@ window.salvarBoleto = async () => {
   const v = parseFloat(document.getElementById('mV').value) || 0;
   if (!ds || v <= 0) { toast('Preencha descricao e valor.'); return; }
   const st = document.getElementById('mSt').value;
-  const { error } = await sb.from('boletos').insert({ mes_id: MES.id, usuario_id: USER.id, vencimento: document.getElementById('mVc').value || '00/00', dia: parseInt(document.getElementById('mD').value) || 0, descricao: ds, valor: v, status: st });
+  const recorrente = document.getElementById('mRecorrente')?.checked || false;
+  const mesesRec = parseInt(document.getElementById('mMesesRec')?.value) || 12;
+  const dia = parseInt(document.getElementById('mD').value) || 0;
+  const vc = document.getElementById('mVc').value || '00/00';
+  const grupoRec = recorrente ? crypto.randomUUID() : null;
+
+  const { error } = await sb.from('boletos').insert({
+    mes_id: MES.id, usuario_id: USER.id,
+    vencimento: vc, dia, descricao: ds, valor: v, status: st,
+    recorrente, grupo_recorrencia: grupoRec
+  });
   if (error) { toast('Erro: ' + error.message); return; }
-  if (st === 'ok') await sb.from('fluxo').insert({ mes_id: MES.id, usuario_id: USER.id, data: document.getElementById('mVc').value || '00/00', tipo: 'Debito', categoria: 'Boleto', descricao: 'Boleto ' + ds, entrada: 0, saida: v, status: 'ok', is_fatura: false });
-  fecharModal(); toast('Boleto salvo!'); await carregarDados(MES.id); render();
+
+  if (st === 'ok') {
+    await sb.from('fluxo').insert({ mes_id: MES.id, usuario_id: USER.id, data: vc, tipo: 'Debito', categoria: 'Boleto', descricao: 'Boleto ' + ds, entrada: 0, saida: v, status: 'ok', is_fatura: false });
+  }
+
+  // Propagar recorrência nos meses seguintes
+  if (recorrente && mesesRec > 0) {
+    const { data: mesSrc } = await sb.from('meses').select('mes_referencia').eq('id', MES.id).single();
+    for (let i = 1; i <= mesesRec; i++) {
+      const dtBase = new Date(mesSrc.mes_referencia + '-01');
+      dtBase.setMonth(dtBase.getMonth() + i);
+      const refProx = dtBase.toISOString().slice(0, 7);
+      const mesStr = String(dtBase.getMonth()+1).padStart(2,'0');
+      const anoStr = dtBase.getFullYear();
+      const vcProx = String(dia).padStart(2,'0') + '/' + mesStr + '/' + anoStr;
+
+      let { data: mesProx } = await sb.from('meses').select('id').eq('usuario_id', USER.id).eq('mes_referencia', refProx).single();
+      if (!mesProx) {
+        const { data: novo } = await sb.from('meses').insert({ usuario_id: USER.id, mes_referencia: refProx, saldo_inicial: 0, vencimento_cartao: MES.vencimento_cartao, saldo_minimo: MES.saldo_minimo, meta_economia: MES.meta_economia, arquivado: false }).select('id').single();
+        mesProx = novo;
+      }
+
+      await sb.from('boletos').insert({
+        mes_id: mesProx.id, usuario_id: USER.id,
+        vencimento: vcProx, dia, descricao: ds, valor: v, status: 'prev',
+        recorrente: true, grupo_recorrencia: grupoRec
+      });
+    }
+    toast(`Boleto salvo e repetido por ${mesesRec} meses!`);
+  } else {
+    toast('Boleto salvo!');
+  }
+
+  fecharModal(); await carregarDados(MES.id); render();
 };
 
 window.salvarFluxo = async () => {
